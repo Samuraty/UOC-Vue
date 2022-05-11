@@ -4,17 +4,24 @@
       <img class="logo" alt="UOC logo" src="./assets/uoc-logo.png" />
       <div class="app-name">Recipe book</div>
     </div>
-    <search-bar />
-    <recipe-list :recipeList="recipeList" />
-    <recipe-form v-if="showModal" />
+    <SearchBar v-on:showForm="toggleForm" v-on:search="setSearchTerm" />
+    <RecipeList
+      :recipeList="recipeListFiltered"
+      v-on:deleteRecipe="deleteRecipe"
+    />
+    <RecipeForm
+      v-on:addRecipe="addRecipe"
+      v-on:closeModal="toggleForm"
+      v-if="showModal"
+    />
   </div>
 </template>
 
 <script>
-import RecipeList from "./components/RecipeList.vue";
-import RecipeForm from "./components/RecipeForm.vue";
-import SearchBar from "./components/SearchBar.vue";
 import { defineComponent } from "vue";
+import RecipeForm from "./components/RecipeForm.vue";
+import RecipeList from "./components/RecipeList.vue";
+import SearchBar from "./components/SearchBar.vue";
 
 export default defineComponent({
   name: "App",
@@ -39,29 +46,61 @@ export default defineComponent({
       {
         id: 2,
         servings: 2,
-        time: "15m",
+        time: "45m",
         difficulty: "Medium",
         title: "Pizza",
         ingredients: ["dough", "tomato sauce", "cheese"],
         directions: ["boil dough", "cook dough", "eat pizza"],
         imageUrl:
-          "https://www.saborusa.com/wp-content/uploads/2019/10/Animate-a-disfrutar-una-deliciosa-pizza-de-salchicha-Foto-destacada.png",
-        featured: true,
+          "https://imagesvc.meredithcorp.io/v3/mm/image?q=60&c=sc&poi=face&w=2000&h=1000&url=https%3A%2F%2Fstatic.onecms.io%2Fwp-content%2Fuploads%2Fsites%2F21%2F2018%2F02%2F14%2Frecetas-4115-spaghetti-boloesa-facil-2000.jpg",
       },
       {
         id: 3,
         servings: 6,
         time: "1h",
         difficulty: "Hard",
-        title: "Salad",
-        ingredients: ["lettuce", "tomato", "cheese"],
-        directions: ["cut lettuce", "cut tomato", "cut cheese"],
+        title: "Lasagna",
+        ingredients: ["noodles", "tomato sauce", "cheese"],
+        directions: ["boil noodles", "cook noodles", "eat noodles"],
         imageUrl:
-          "https://www.unileverfoodsolutions.es/dam/global-ufs/mcos/SPAIN/calcmenu/recipes/ES-recipes/In-Development/american-bbq-beef-salad/main-header.jpg",
+          "https://imagesvc.meredithcorp.io/v3/mm/image?q=60&c=sc&poi=face&w=2000&h=1000&url=https%3A%2F%2Fstatic.onecms.io%2Fwp-content%2Fuploads%2Fsites%2F21%2F2018%2F02%2F14%2Frecetas-4115-spaghetti-boloesa-facil-2000.jpg",
       },
     ],
     showModal: false,
+    searchTerm: "",
   }),
+  methods: {
+    addRecipe(recipe) {
+      this.recipeList = [...this.recipeList, recipe];
+      this.toggleForm();
+    },
+    deleteRecipe(recipeId) {
+      this.recipeList = this.recipeList.filter(
+        (recipe) => recipe.id !== recipeId
+      );
+    },
+    toggleForm() {
+      this.showModal = !this.showModal;
+    },
+    setSearchTerm(searchTerm) {
+      this.searchTerm = searchTerm;
+    },
+  },
+  computed: {
+    recipeListFiltered() {
+      if (!this.searchTerm) {
+        return this.recipeList;
+      }
+      return this.recipeList.filter((recipe) => {
+        return (
+          recipe.title.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+          recipe.ingredients
+            .map((ingredient) => ingredient.toLowerCase())
+            .includes(this.searchTerm.toLowerCase())
+        );
+      });
+    },
+  },
 });
 </script>
 
