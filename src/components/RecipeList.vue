@@ -1,14 +1,14 @@
 <template>
   <div id="recipe-list" class="recipe-list">
     <div v-for="recipe in recipeList" :key="recipe.id">
-      <recipe :recipe="recipe" />
+      <recipeCard :recipe="recipe" v-on:delete-recipe="deleteRecipe" />
     </div>
   </div>
 </template>
 
 <script>
 import { defineComponent } from "vue";
-import Recipe from "./Recipe.vue";
+import RecipeCard from "./RecipeCard.vue";
 
 export default defineComponent({
   name: "RecipeList",
@@ -18,7 +18,12 @@ export default defineComponent({
       required: true,
     },
   },
-  components: { Recipe },
+  components: { RecipeCard },
+  methods: {
+    deleteRecipe(recipeId) {
+      this.$emit("delete-recipe", recipeId);
+    },
+  },
 });
 </script>
 

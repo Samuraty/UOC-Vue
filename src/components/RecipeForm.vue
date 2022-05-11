@@ -3,30 +3,33 @@
     <div class="recipe-form">
       <div class="recipe-form-header">
         <h2>Add a new recipe</h2>
-        <button>
+        <button @click="closeForm">
           <img src="../assets/close-button.svg" alt="Close modal" />
         </button>
       </div>
-      <form>
+      <div class="error" v-if="error">
+        The fields name, ingredients and directions are required.
+      </div>
+      <form @submit.prevent="addRecipe">
         <div class="recipe-form-item">
           <label for="title">Title</label>
-          <input type="text" id="title" />
+          <input type="text" id="title" v-model="recipe.title" />
         </div>
         <div class="recipe-form-item">
           <label for="imageUrl">Image URL</label>
-          <input type="text" id="imageUrl" />
+          <input type="text" id="imageUrl" v-model="recipe.imageUrl" />
         </div>
         <div class="recipe-form-item">
           <label for="servings">Servings</label>
-          <input type="number" id="servings" />
+          <input type="number" id="servings" v-model="recipe.servings" />
         </div>
         <div class="recipe-form-item">
           <label for="time">Time</label>
-          <input type="number" id="time" />
+          <input type="text" id="time" v-model="recipe.time" />
         </div>
         <div class="recipe-form-item">
           <label for="difficulty">Difficulty</label>
-          <select id="difficulty">
+          <select id="difficulty" v-model="recipe.difficulty">
             <option value="easy">Easy</option>
             <option value="medium">Medium</option>
             <option value="hard">Hard</option>
@@ -34,11 +37,15 @@
         </div>
         <div class="recipe-form-item">
           <label for="ingredients">Ingredients</label>
-          <input type="text" id="ingredients" />
+          <textarea type="text" id="ingredients" v-model="recipe.ingredients" />
         </div>
         <div class="recipe-form-item">
           <label for="directions">Directions</label>
-          <input type="text" id="directions" />
+          <textarea type="text" id="directions" v-model="recipe.directions" />
+        </div>
+        <div class="recipe-form-item">
+          <label for="featured">Featured Recipe</label>
+          <input type="checkbox" id="featured" v-model="recipe.featured" />
         </div>
         <div class="recipe-form-item">
           <button type="submit">Add Recipe</button>
@@ -50,9 +57,56 @@
 
 <script>
 import { defineComponent } from "vue";
-
+import { uuid } from "vue-uuid";
 export default defineComponent({
   name: "RecipeForm",
+  data: () => ({
+    recipe: {
+      id: "",
+      title: "",
+      imageUrl: "",
+      servings: "",
+      time: "",
+      difficulty: "",
+      ingredients: [],
+      directions: [],
+    },
+    isEditing: false,
+    error: false,
+  }),
+  methods: {
+    addRecipe() {
+      if (
+        this.recipe.title.length === 0 ||
+        this.recipe.ingredients.length === 0 ||
+        this.recipe.directions.length === 0
+      ) {
+        this.error = true;
+        return;
+      }
+      this.recipe.id = uuid.v4();
+      this.recipe.ingredients = this.recipe.ingredients.split(",");
+      this.recipe.directions = this.recipe.directions.split(",");
+      console.log(this.recipe);
+      this.$emit("add-recipe", this.recipe);
+      this.resetRecipe();
+    },
+    resetRecipe() {
+      this.recipe = {
+        id: "",
+        title: "",
+        imageUrl: "",
+        servings: "",
+        time: "",
+        difficulty: "",
+        ingredients: [],
+        directions: [],
+      };
+    },
+    closeForm() {
+      this.$emit("close-modal");
+    },
+  },
 });
 </script>
 
@@ -100,7 +154,8 @@ export default defineComponent({
   margin-bottom: 5px;
 }
 .recipe-form-item input,
-.recipe-form-item select {
+.recipe-form-item select,
+.recipe-form-item textarea {
   width: 100%;
   padding: 10px;
   border: 1px solid #ccc;
@@ -114,5 +169,9 @@ export default defineComponent({
   border: none;
   border-radius: 4px;
   cursor: pointer;
+}
+.error {
+  color: red;
+  margin-bottom: 20px;
 }
 </style>
